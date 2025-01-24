@@ -282,3 +282,270 @@ WHERE BONUS IS NULL;
 -- 5. PROFESSOR 테이블에서 EMAIL 중에서 아이디만 조회하시오
 SELECT SUBSTR(EMAIL, 1, INSTR(EMAIL, '@') - 1) AS EMAIL_ID
 FROM PROFESSOR;
+
+----------------------------------------------------------------------------
+
+SELECT * FROM emp;
+
+-- 1. 문자열 연결(concat) 단, concat은 인수를 2개까지밖에 못 받음
+SELECT concat(ename, job) AS concat FROM emp;
+
+-- 2. ename:job을 컬럼 하나로 출력 ex) SMITH:CLERK <- 형식으로 출력
+SELECT concat(concat(ename, ':'), job) AS dbl_concat FROM emp;
+SELECT concat(ename, concat(':', job)) AS dbl_concat FROM emp;
+
+-- p.142 문자열 연결 (||)
+SELECT ename || ':' || job AS "이름:직업"
+FROM emp;
+
+-- 공백 제거(TRIM 함수)
+SELECT '     oracle     ', LENGTH('     oracle     '),
+    TRIM('     oracle     '), LENGTH(TRIM('     oracle     ')) AS TRIM길이,
+    LTRIM('     oracle     '), LENGTH(LTRIM('     oracle     ')) AS LTRIM길이,
+    RTRIM('     oracle     '), LENGTH(RTRIM('     oracle     ')) AS RTRIM길이
+FROM dual;
+
+-- 숫자 관련 함수
+-- 반올림: ROUND()
+SELECT 123.567, ROUND(123.567), ROUND(123.567, 1), ROUND(123.567, 2),
+    ROUND(123.567, -1)
+FROM dual;
+-- 버림: TRUNC()
+SELECT 15.793, TRUNC(15.793), TRUNC(15.793, 1), TRUNC(15.793, 2),
+    TRUNC(15.793, -1)
+FROM dual;
+-- 올림(가장 가까운 큰 정수): CEIL()
+SELECT 3.14, CEIL(3.14)
+FROM dual;
+-- 가장 가까운 작은 정수: FLOOR()
+SELECT 3.14, FLOOR(3.14)
+FROM dual;
+-- TRUNC, CEIL, FLOOR 비교
+SELECT TRUNC(3.14), CEIL(3.14), FLOOR(3.14), TRUNC(-3.14), CEIL(-3.14), FLOOR(-3.14)
+FROM dual;
+-- 제곱: POWER()
+SELECT POWER(2, 3) FROM dual;
+-- 나머지: MOD()
+SELECT MOD(15, 6) FROM dual;
+
+-- 날짜 관련 함수
+SELECT sysdate AS 오늘, sysdate + 1 AS 내일, sysdate - 1 AS 어제,
+    sysdate + 3
+FROM dual;
+-- 3개월 뒤
+SELECT sysdate, ADD_MONTHS(sysdate, 3), ADD_MONTHS('22/05/01', 3)
+FROM dual;
+-- emp 테이블에서 사원번호(empno), 이름(ename), 입사일(hiredate) 출력
+-- 입사 10년 후 날짜를 '입사10년후' 제목으로 출력
+SELECT empno, ename, hiredate, ADD_MONTHS(hiredate, 120) AS 입사10년후
+FROM emp;
+SELECT MONTHS_BETWEEN(sysdate, '24/01/24') FROM dual;
+-- emp 테이블에서 이름, 근무개월 수(소숫점 둘째자리에서 버림) 출력
+SELECT ename, hiredate, TRUNC(MONTHS_BETWEEN(sysdate, hiredate), 1) AS 근무개월수
+FROM emp;
+-- 근무개월수 출력, 단 '개월'이라는 글자를 붙이고 출력, 소숫점 이하는 버림
+-- 단, CONCAT함수 사용
+SELECT CONCAT(TRUNC(MONTHS_BETWEEN(sysdate, hiredate)), '개월') AS 근무개월수
+FROM emp;
+
+-- NEXT_DAY, LAST_DAY 함수
+SELECT sysdate, NEXT_DAY(sysdate, '월요일') AS 월요일,
+    NEXT_DAY(sysdate, '토요일') AS 토요일,
+    LAST_DAY(sysdate) AS 마지막날,
+    LAST_DAY('96/01/04')
+FROM dual;
+
+-- 사원번호(empno)가 짝수인 사원의 사원번호(empno), 이름(ename), 직급(job) 출력
+SELECT empno, ename, job
+FROM emp
+WHERE MOD(empno, 2) = 0;
+
+-- 급여(sal)가 1500에서 3000 사이의 사원은 그 급여의 15%를 회비로 낸다
+-- 이름, 급여, 회비(반올림) 출력
+SELECT ename, sal, ROUND(sal * 0.15) AS 회비
+FROM emp
+WHERE sal BETWEEN 1500 AND 3000;
+
+-- p.157 형 변환 함수
+describe emp;
+SELECT empno, ename, empno + '500' -- '500'이 숫자로 형변환되었음
+FROM emp;
+
+-- 문자열로 변환해주는 함수 TO_CHAR(값, 형식)
+SELECT TO_CHAR(sysdate, 'mm')월 FROM dual;
+SELECT TO_CHAR(sysdate, 'dd')일 FROM dual;
+SELECT TO_CHAR(sysdate, 'hh')시 FROM dual;
+SELECT TO_CHAR(sysdate, 'mi')분 FROM dual;
+SELECT TO_CHAR(sysdate, 'ss')초 FROM dual;
+SELECT TO_CHAR(sysdate, 'mon')월 FROM dual;
+SELECT TO_CHAR(sysdate, 'month')월 FROM dual;
+SELECT TO_CHAR(sysdate, 'day')요일 FROM dual;
+
+-- 입사일이 1, 2, 3월인 사원의 번호, 이름, 입사일 출력
+SELECT empno, ename, hiredate
+FROM emp
+WHERE TO_CHAR(hiredate, 'mm') IN (1, 2, 3);
+
+SELECT TO_CHAR(sal, '$999,999') sal_$,
+    TO_CHAR(sal, 'L999,999') sal_$,
+    TO_CHAR(sal, '999,999') sal_9,
+    TO_CHAR(sal, '000,999') sal_0
+FROM emp;
+
+-- TO_NUMBER(값, 인식할 형식)
+SELECT 1300 - 1500 FROM dual;
+SELECT TO_NUMBER('1300') - TO_NUMBER('1500') FROM dual;
+SELECT TO_NUMBER('1,300', '999,999') - TO_NUMBER('1,500','999,999')
+FROM dual;
+-- SELECT TO_NUMBER('1,300') - TO_NUMBER('1,500') FROM dual; <- 이건 오류
+
+-- p.164 '20240727' 얘를 날짜형으로 바꾸기 TO_DATE(값, 형식)
+SELECT TO_DATE('20240727') as str_date FROM dual;
+
+-- 81/12/03 이후 입사한 사원 출력
+SELECT * FROM emp WHERE hiredate >= TO_DATE('81/12/03');
+
+----------------------------------------------------------------------------
+-- NVL(값, null일때 넣을 값) <- null을 치환해줌
+-- 사번, 이름, 급여, 커미션, 급여+커미션 출력 (null+숫자 = null임)
+SELECT empno, ename, comm, sal + comm AS 수입
+FROM emp;
+SELECT empno, ename, comm, sal + nvl(comm, 0) AS 수입
+FROM emp;
+
+-- 사번, 이름, 급여, 커미션, 급여+커미션(col=수입) 출력
+-- 단, 수입을 천단위로 구분하여 출력
+SELECT empno, ename, comm, TO_CHAR((sal + nvl(comm, 0)) * 12, '999,999') AS 연봉
+FROM emp;
+
+-- NVL2(값, null이 아닐때 치환할 값, null일 때 치환할 값)
+-- comm을 받으면 O, 받지 않으면 X라고 출력
+SELECT empno, ename, comm, NVL2(comm, 'O', 'X')
+FROM emp;
+
+-- 연봉 출력 (단, NVL2 사용)
+SELECT empno, ename, sal, sal * 12 + NVL2(comm, comm, 0) AS 연봉,
+    TO_CHAR(sal * 12 + NVL2(comm, comm, 0), '999,999') AS 연봉2
+FROM emp;
+
+-- empno, ename, mgr 출력 / 단, mgr이 null이면, 'CEO' 출력
+SELECT empno, ename, NVL2(mgr, TO_CHAR(mgr), 'CEO') AS mgr
+FROM emp;
+
+------------------------------------
+
+-- p.170
+-- DECODE() -> if문 함수
+-- job에 따라 급여 다르게 인상
+-- MANAGER 1.5 / SALESMAN 1.2 / ANALYST 1.05 / 1.04
+SELECT empno, ename, job, sal,
+    DECODE(job, 'MANAGER', sal * 1.5, 'SALESMAN', sal * 1.2,
+        'ANALYST', sal * 1.05, sal * 1.04) AS 인상SAL
+FROM emp;
+-- CASE WHEN THEN END
+SELECT empno, ename, job, sal,
+    CASE job
+        WHEN 'MANAGER' THEN sal * 1.5
+        WHEN 'SALESMAN' THEN sal * 1.2
+        WHEN 'ANALYST' THEN sal * 1.05
+        ELSE sal * 1.04
+    END AS 인상급여
+FROM emp;
+SELECT empno, ename, job, sal,
+    CASE
+        WHEN job = 'MANAGER' THEN sal * 1.5
+        WHEN job = 'SALESMAN' THEN sal * 1.2
+        WHEN job = 'ANALYST' THEN sal * 1.05
+        ELSE sal * 1.04
+    END AS 인상급여
+FROM emp;
+
+-- comm이 null이면 '해당사항 없음', comm = 0이면 '수당 없음',
+-- comm이 있으면 '수당: ~~' 출력
+-- 1) DECODE() 사용
+SELECT empno, ename, comm,
+    DECODE(comm, null, '해당사항 없음', 0, '수당 없음', CONCAT('수당: ', comm)) AS comm_txt
+FROM emp;
+
+-- 2) CASE 사용
+SELECT empno, ename, comm,
+    CASE
+        WHEN comm IS null THEN '해당사항 없음'
+        WHEN comm = 0 THEN '수당 없음'
+        ELSE CONCAT('수당: ', comm)
+        END AS comm_txt
+FROM emp;
+
+------------------------------------------------------------------------------------------
+
+-- professor 테이블
+-- 1. professor 테이블 name과 deptno, 학과명 출력
+-- 단, deptno = 101이면 '컴퓨터공학과'
+-- 1) case문
+SELECT name, deptno,
+    CASE
+        WHEN deptno = 101 THEN '컴퓨터공학과'
+        END AS 학과명
+FROM professor;
+
+-- 2) DECODE
+SELECT name, deptno, DECODE(deptno, 101, '컴퓨터공학과')
+FROM professor;
+
+-- 2. professor 테이블 name과 deptno, 학과명 출력
+-- 단, deptno = 101이면 '컴퓨터공학과', 나머지 학과는 기타로 출력
+-- 1) case문
+SELECT name, deptno,
+    CASE
+        WHEN deptno = 101 THEN '컴퓨터공학과'
+        ELSE '기타'
+        END AS 학과명
+FROM professor;
+
+-- 2) DECODE
+SELECT name, deptno, DECODE(deptno, 101, '컴퓨터공학과', '기타')
+FROM professor;
+
+-- 3. professor 테이블 name과 deptno, 학과명 출력
+-- 단, deptno = 101이면 '컴퓨터공학과'
+-- 102면 멀티미디어 공학과
+-- 201이면 소프트웨어공학과
+-- 나머지는 기타 출력
+-- 1) case문
+SELECT name, deptno,
+    CASE deptno
+        WHEN 101 THEN '컴퓨터공학과'
+        WHEN 102 THEN '멀티미디어공학과'
+        WHEN 201 THEN '소프트웨어공학과'
+        ELSE '기타'
+        END AS 학과명
+FROM professor;
+
+-- 2) DECODE
+SELECT name, deptno,
+    DECODE(deptno, 101, '컴퓨터공학과', 102, '멀티미디어공학과', 201, '소프트웨어공학과', '기타') AS 학과명
+FROM professor;
+
+-- student 테이블에서 학생을 3개의 팀으로 분류함
+-- studno를 3으로 나누어
+-- 나머지가 0이면 A팀, 1이면 B팀, 2이면 C팀
+-- studno, name, deptno1, 팀이름
+-- CASE
+SELECT studno, name, deptno1,
+    CASE MOD(studno, 3)
+        WHEN 0 THEN 'A'
+        WHEN 1 THEN 'B'
+        WHEN 2 THEN 'C'
+        END AS 팀이름
+FROM student;
+
+-- DECODE()
+SELECT studno, name, deptno1,
+    DECODE(MOD(studno, 3), 0, 'A', 1, 'B', 2, 'C') AS 팀이름
+FROM student;
+
+-- 1. 학생 테이블에서 jumin 7번째 숫자가 1이면 남자, 2면 여자
+-- studno, name, jumin, 새 컬럼(성별)
+SELECT studno, name, jumin,
+    DECODE(SUBSTR(jumin, 7, 1), 1, '남자', 2, '여자') AS 성별
+FROM student;
