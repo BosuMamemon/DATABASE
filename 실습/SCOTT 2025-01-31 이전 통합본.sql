@@ -546,6 +546,46 @@ FROM student;
 
 -- 1. 학생 테이블에서 jumin 7번째 숫자가 1이면 남자, 2면 여자
 -- studno, name, jumin, 새 컬럼(성별)
+-- 1) DECODE문
 SELECT studno, name, jumin,
     DECODE(SUBSTR(jumin, 7, 1), 1, '남자', 2, '여자') AS 성별
+FROM student;
+
+-- 2) CASE문
+SELECT studno, name, jumin,
+    CASE SUBSTR(jumin, 7, 1)
+        WHEN '1' THEN '남자' -- SUBSTR로 뽑아온 놈은 문자열임
+        WHEN '2' THEN '여자'
+        END AS 성별
+FROM student;
+
+-- 2. tel의 지역번호에 따라 02 = 서울, 051 = 부산, 052 = 울산, 053 = 대구, 나머지 = 기타
+-- 이름, 전화번호, 지역 출력
+-- 1) DECODE문
+SELECT name AS 이름, tel AS 전화번호,
+    DECODE(SUBSTR(tel, 1, INSTR(tel, ')') - 1),
+        '02', '서울',
+        '051', '부산',
+        '052', '울산',
+        '053', '대구',
+        '기타') AS 지역
+FROM student;
+
+-- 2) CASE문
+SELECT name AS 이름, tel AS 전화번호,
+    CASE SUBSTR(tel, 1, INSTR(tel, ')') - 1)
+        WHEN '02' THEN '서울'
+        WHEN '051' THEN '부산'
+        WHEN '052' THEN '울산'
+        WHEN '053' THEN '대구'
+        ELSE '기타'
+        END AS 지역
+FROM student;
+
+--
+SELECT name, jumin,
+    RPAD(SUBSTR(jumin, 1, 6), length(jumin), '*') AS 주민번호
+FROM student;
+SELECT name, jumin,
+    SUBSTR(jumin, 1, 6) || '-' || SUBSTR(jumin, 6) AS 주민번호
 FROM student;
