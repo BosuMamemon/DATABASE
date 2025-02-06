@@ -204,3 +204,48 @@ FROM emp
 GROUP BY CUBE(deptno, job)
 ORDER BY deptno, job;
 
+---------------------------------------------------------------------------------------
+
+-- p.215 JOIN
+SELECT * FROM emp;
+SELECT * FROM dept;
+
+-- SMITH의 부서명을 dept 테이블에서 구하여 출력
+SELECT deptno FROM emp WHERE ename = 'SMITH';
+SELECT dname FROM dept WHERE deptno = 20;
+SELECT dname FROM dept WHERE deptno = (SELECT deptno FROM emp WHERE ename = 'SMITH');
+
+--------------------------------------------------------------------------------------
+SELECT * FROM emp e, dept d;
+--------------------------------------------------------------------------------------
+
+-- 등가JOIN
+SELECT * FROM emp e, dept d
+WHERE e.deptno = d.deptno;
+
+-- 사원번호, 사원이름, 직급, 부서명, 지역을 등가조인
+SELECT empno, ename, job, dname, loc, e.deptno, d.deptno -- empno같은 애들은 조인해도 1종류밖에 없으니 e.이런거 생략해도 상관없음
+FROM emp e, dept d
+WHERE e.deptno = d.deptno;
+
+--------------------------------------------------------------------------------------
+SELECT * FROM emp e, salgrade s;
+--------------------------------------------------------------------------------------
+
+-- 비등가JOIN
+SELECT * 
+FROM emp e, salgrade s
+WHERE e.sal BETWEEN s.losal AND s.hisal;
+
+-- SMITH 사원의 상사의 이름을 출력
+-- 1) 서브 쿼리 사용
+SELECT ename
+FROM emp 
+WHERE empno = (SELECT mgr FROM emp WHERE ename = 'SMITH');
+
+-- 2) 조인 사용(셀프 조인 / 자체 조인)
+SELECT e1.empno AS 사원번호, e1.ename AS 사원이름, e1.mgr AS 상사번호,
+    e2.empno AS 상사사원번호, e2.ename AS 상사이름
+FROM emp e1, emp e2
+WHERE e1.mgr = e2.empno
+ORDER BY e1.empno;
