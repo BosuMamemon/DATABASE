@@ -1,4 +1,5 @@
 SET SERVEROUTPUT ON;
+
 --1. employees 테이블
 --employee_id = 200인 사원의 모든 정보를 추출해서
 --아이디, 이름, 입사일 출력
@@ -54,7 +55,6 @@ END;
 /
 --SQL문에 CASE문 쓰기
 DECLARE
-    note VARCHAR2(50) := NULL;
     CURSOR c IS
         SELECT
             department_id, first_name, salary, phone_number,
